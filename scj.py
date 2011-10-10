@@ -172,8 +172,8 @@ class SCJProgress(QHBoxLayout):
         self.filename = file
         self.createDir = createDir
         self.process = SCJ(self.filename, self.format, createDir)
-        self.output = self.process.output
-        self.command = self.process.output
+        self.output = QString(self.process.output)
+        self.command = QString(self.process.command)
         self.log = QStringList()
 
         self.label = QLabel(self.output)
@@ -264,8 +264,8 @@ class SCJProgress(QHBoxLayout):
 
     def enable(self):
         self.process = SCJ(self.filename, self.format, self.createDir)
-        self.output = self.process.output
-        self.command = self.process.output
+        self.output = QString(self.process.output)
+        self.command = QString(self.process.output)
         self.connect(self.process, SIGNAL('progress(int)'), self.bar.setValue)
         self.connect(self.process, SIGNAL('error(QString)'), self.addLog)
         self.connect(self.process, SIGNAL('finished()'), self.enable)
@@ -311,34 +311,17 @@ class QtSCJ(QDialog) :
         self.mode = mode
 
     def setupUi(self):
-        self.setObjectName("qtsox")
-        self.resize(500, 300)
+        self.setObjectName("SCJ")
+        self.setFixedSize(600,260)
+        #self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.verticalLayout = QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
         self.infoText = QTextEdit(self)
-        palette = QPalette()
-        brush = QBrush(QColor(255, 255, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Text, brush)
-        brush = QBrush(QColor(0, 0, 0))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Base, brush)
-        brush = QBrush(QColor(255, 255, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        brush = QBrush(QColor(0, 0, 0))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Inactive, QPalette.Base, brush)
-        brush = QBrush(QColor(126, 125, 124))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Disabled, QPalette.Text, brush)
-        brush = QBrush(QColor(255, 255, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Disabled, QPalette.Base, brush)
-        self.infoText.setPalette(palette)
+        self.infoText.setFixedHeight(200)
         self.infoText.setObjectName("infoText")
         self.infoText.setReadOnly(True)
         self.verticalLayout.addWidget(self.infoText)
+        # Manage Actions buttons
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QSpacerItem(40, 20, QSizePolicy.Expanding,
@@ -371,6 +354,7 @@ class QtSCJ(QDialog) :
         self.frame.setMinimumSize(520,250)
         self.frame.setMaximumWidth(520)
         self.scroll = QScrollArea()
+        self.scroll.setMinimumHeight(180)
         self.jobsLayout = QVBoxLayout(self.frame)
         self.jobsLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
         #self.jobsLayout.setSizeConstraint(QLayout.SetMinimumSize)
@@ -384,6 +368,8 @@ class QtSCJ(QDialog) :
         #self.jobsLayout = QVBoxLayout()
         #self.verticalLayout.addLayout(self.jobsLayout)
 
+        # Add a strech to the bottom of the window
+        self.verticalLayout.insertStretch(-1)
 
     def retranslateUi(self):
         self.setWindowTitle(u"SCJ")
@@ -397,13 +383,15 @@ class QtSCJ(QDialog) :
         self.convertFile.setToolTip(u"Convertir un fichier")
         self.convertFile.setText(u"Fichier(s)")
         self.addText(
-                u"<h1>            BIENVENUE SUR SCJ           </h1>\
+                u"<h1>BIENVENUE SUR SCJ</h1>\
                 \nSCJ permet de convertir un ou plusieurs fichiers son vers\
-                \ndifférents formats.<br/><br/>\
+                \ndifférents formats.<br/>\
                 \nIl gère également les répertoires en convertissant\
-                \nl'ensemble des fichiers sons présents vers le format voulu.<br/>\
-                \nCliquez sur Fichier(s) ou Répertoire en fonction de ve que\
-                \nvous voulez convertir."
+                \nl'ensemble des fichiers sons présents vers le format voulu.\
+                \n<ul><li>Choisissez le format de destination</li>\
+                \n<li>Cliquez sur Fichier(s) ou Répertoire en fonction de ve que\
+                \nvous voulez convertir.</li>\
+                \n<li><b>Démarrez la conversion !</b></li></ul>"
                 )
 
     def addFile(self, file, createDir=False):
@@ -420,8 +408,9 @@ class QtSCJ(QDialog) :
         self.addStartAll()
 
     def delFile(self, job):
-        self.jobs.pop(job)
+        j = self.jobs.pop(job)
         self.addStartAll()
+        self.jobsLayout.removeItem(j)
 
     def getDir(self):
         self.dir = QFileDialog.getExistingDirectory(
@@ -444,8 +433,15 @@ class QtSCJ(QDialog) :
             self.addFile(QFileInfo(file), createDir=False)
 
     def addStartAll(self):
-        self.startallbtn.setVisible((len(self.jobs) > 0 ))
-        self.scroll.setVisible((len(self.jobs) > 0 ))
+        if (len(self.jobs) > 0 ):
+            self.startallbtn.setVisible(True)
+            self.scroll.setVisible(True)
+            self.setFixedSize(600, 480)
+        else:
+            self.startallbtn.setVisible(False)
+            self.scroll.setVisible(False)
+            self.setFixedSize(600, 260)
+        self.updateGeometry()
 
     def startAll(self):
         for (key, job) in self.jobs.items():
