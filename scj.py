@@ -94,7 +94,7 @@ class SCJ(QThread):
         self.process = None
         self.retCode = None
         self.running = False
-        self.log = u""
+        self.log = QString(u"")
 
     def setProgress(self, value):
         self.value = value
@@ -163,7 +163,7 @@ class SCJ(QThread):
             val = re.findall(u"[\.\d]+%", line)[0]
             self.setProgress(float(val[:-1]))
         else :
-            self.log += line
+            self.log.append(line)
 
 class SCJProgress(QHBoxLayout):
     def __init__(self, parent=None, file=None, format=None, createDir=False ):
