@@ -1,3 +1,34 @@
 SCJ: Sound Converter for Jenna
 
 SCJ is a little frontend to convert multiple sound files to mutliple format
+
+REQUIREMENTS
+============
+SCJ is based on python and PyQt4.
+SCJ needs sox and ffmpeg to provide the convertion facility.
+
+INSTALL PROCESS
+===============
+$ make
+$ sudo make DESTDIR=<prefix> install
+
+this will create :
+<prefix>/bin/scj
+<prefix>/share/scj/*
+
+RUNNING
+=======
+$ scj
+
+Choose your output format and select files or directories to convert.
+For each file selected, SCJ will output a file named :
+  file.[new-extension]
+For each directory, SCJ will create a new directory named :
+  directory-[new-extension]
+
+ie:
+- for a the 'album' directory and a 'ogg' conversion, all output files will
+  be created in 'album-ogg'
+
+- for a the 'greatsong.mp3' song and a 'ogg' conversion, the output file will
+  be 'greatsong.ogg'
