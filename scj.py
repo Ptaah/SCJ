@@ -82,11 +82,11 @@ class SCJ(QThread):
                                        self.file.completeBaseName(),
                                        self.format)
         if self.format != "mp3":
-            self.command = u"sox -S %s -t %s %s" % (self.filename,
+            self.command = u"sox -S '%s' -t %s '%s'" % (self.filename,
                                              self.format,
                                              self.output)
         else:
-            self.command = u"sox -S %s -t wav - | ffmpeg -y -i - -f %s %s" % \
+            self.command = u"sox -S '%s' -t wav - | ffmpeg -y -i - -f %s '%s'" % \
                                         (self.filename,
                                          self.format,
                                          self.output)
