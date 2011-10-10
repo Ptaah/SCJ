@@ -5,6 +5,7 @@ from PyQt4.QtCore import QDir
 from PyQt4.QtCore import QFile
 from PyQt4.QtCore import QFileInfo
 from PyQt4.QtCore import QMutex
+from PyQt4.QtCore import QSettings
 from PyQt4.QtCore import QString
 from PyQt4.QtCore import QStringList
 from PyQt4.QtCore import Qt
@@ -299,6 +300,8 @@ class QtSCJ(QDialog) :
         self.filter = "*.mp3 *.ogg *.wav"
         self.modes = [ "ogg", "mp3", "wav" ]
 
+        self.readSettings()
+
         self.setupUi()
         self.retranslateUi()
         self.fermer.setEnabled(True)
@@ -315,6 +318,15 @@ class QtSCJ(QDialog) :
 
     def setMode(self, mode):
         self.mode = mode
+        self.writeSettings()
+
+    def writeSettings(self):
+        settings = QSettings("scj", "scj")
+        settings.setValue("mode", self.mode)
+
+    def readSettings(self):
+        settings = QSettings("scj", "scj")
+        self.mode = settings.value("mode", "ogg").toString()
 
     def setupUi(self):
         self.setObjectName("SCJ")
@@ -338,6 +350,7 @@ class QtSCJ(QDialog) :
         self.horizontalLayout.addWidget(self.outlabel)
         self.output = QComboBox()
         self.output.addItems(self.modes)
+        self.output.setCurrentIndex(self.output.findText(self.mode))
         self.horizontalLayout.addWidget(self.output)
         # Buttons
         self.fermer = QPushButton(self)
