@@ -106,9 +106,7 @@ class SCJ(QThread):
         directory = QDir(path)
         SCJ.lock.lock()
         if not directory.exists() :
-            print "Debug:: %s doesn't exists... creating" % path
             if not directory.mkpath(path) :
-                print "Debug:: Cannot create %s" % path
                 self.emit(SIGNAL("error(QString)"),
                           QString(u"Cannot create %s" % path))
         SCJ.lock.unlock()
