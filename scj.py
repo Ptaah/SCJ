@@ -66,6 +66,7 @@ def Process( command, output = subprocess.PIPE, outputerr = subprocess.PIPE,
     return process
 
 class SCJ(QThread):
+    lock = QMutex()
     def __init__(self, file=None, format=None, createDir=False):
         super(SCJ, self).__init__()
         self.format = format
@@ -101,10 +102,15 @@ class SCJ(QThread):
         self.emit(SIGNAL("progress(int)"), self.value)
 
     def mkdir(self, path):
-        directory = QDir()
-        if not directory.mkpath(path) :
-            self.emit(SIGNAL("error(QString)"),
-                      QString(u"Cannot create %s" % path))
+        directory = QDir(path)
+        SCJ.lock.lock()
+        if not directory.exists() :
+            print "Debug:: %s doesn't exists... creating" % path
+            if not directory.mkpath(path) :
+                print "Debug:: Cannot create %s" % path
+                self.emit(SIGNAL("error(QString)"),
+                          QString(u"Cannot create %s" % path))
+        SCJ.lock.unlock()
 
     def run(self):
         self.running = True
