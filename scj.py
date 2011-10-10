@@ -4,19 +4,26 @@
 from PyQt4.QtCore import QDir
 from PyQt4.QtCore import QFile
 from PyQt4.QtCore import QFileInfo
-from PyQt4.QtCore import QObject
-from PyQt4.QtCore import QRegExp
-from PyQt4.QtCore import QSize
+from PyQt4.QtCore import QMutex
 from PyQt4.QtCore import QString
 from PyQt4.QtCore import QStringList
 from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QVariant
 from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QFileDialog, QLabel, QImage, QApplication
-from PyQt4.QtGui import QDialog, QVBoxLayout, QHBoxLayout, QColor
-from PyQt4.QtGui import QSpacerItem, QProgressBar, QTextEdit
-from PyQt4.QtGui import QBrush, QSizePolicy, QPushButton, QPalette
+from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QApplication
+from PyQt4.QtGui import QColor
+from PyQt4.QtGui import QHBoxLayout
+from PyQt4.QtGui import QVBoxLayout
+from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QSpacerItem
+from PyQt4.QtGui import QProgressBar
+from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QPushButton
+from PyQt4.QtGui import QSizePolicy
+from PyQt4.QtGui import QBrush
+from PyQt4.QtGui import QPalette
 from PyQt4.QtGui import QScrollArea
 from PyQt4.QtGui import QIcon
 from PyQt4.QtGui import QComboBox
