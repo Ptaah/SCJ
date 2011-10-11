@@ -44,26 +44,10 @@ def Process( command, output = subprocess.PIPE, outputerr = subprocess.PIPE,
     """
         Fonction permettant de lancer un processus via subprocess.Popen
     """
-    # Adaptation du code pour la version Win créée avec py2exe
-    if os.name == 'nt' :
-        if stdinput == None :
-            stdinput =  file('nul','a')
-        if output == None :
-            output =  file('nul','a')
-        if outputerr == None :
-            outputerr =  file('nul','a')
-
-    try:
-        process = subprocess.Popen( command, shell = True, stdin = stdinput,
-                                    stdout = output, stderr = outputerr,
-                                    universal_newlines = universal_newlines,
-                                    bufsize = bufsize,
-                                    preexec_fn = os.setsid)
-    except AttributeError :
-        process = subprocess.Popen( command, shell = True, stdin = stdinput,
-                                    stdout = output, stderr = outputerr,
-                                    universal_newlines = universal_newlines,
-                                    bufsize = bufsize)
+    process = subprocess.Popen( command, shell = False, stdin = stdinput,
+                                   stdout = output, stderr = outputerr,
+                                   universal_newlines = universal_newlines,
+                                   bufsize = bufsize)
     return process
 
 class SCJ(QThread):
@@ -84,14 +68,13 @@ class SCJ(QThread):
                                        self.file.completeBaseName(),
                                        self.format)
         if self.format != "mp3":
-            self.command = u"sox -S '%s' -t %s '%s'" % (self.filename,
-                                             self.format,
-                                             self.output)
+            self.command = [ u"/usr/bin/sox", u"-S", u"%s" % self.filename,
+                             u"-t", u"%s" % self.format, u"%s" % self.output ]
         else:
-            self.command = u"sox -S '%s' -t wav - | ffmpeg -y -i - -f %s '%s'" % \
-                                        (self.filename,
-                                         self.format,
-                                         self.output)
+            self.command = [ u"/usr/bin/sox", u"-S", u"%s" % self.filename,
+                             u"-t", u"wav", u"-" ]
+            self.pipecmd = [ u"/usr/bin/ffmpeg", u"-y", u"-i", u"-",
+                             u"-f", u"%s" % self.format, u"%s" % self.output ]
         self.value = 0
         self.process = None
         self.retCode = None
@@ -116,6 +99,9 @@ class SCJ(QThread):
         self.mkdir(self.outputdir)
         self.process = Process( self.command,
                                     stdinput = None)
+        if self.pipecmd :
+            self.pipe = Process( self.pipecmd, stdinput = self.process.stdout)
+            self.process.stdout.close()
         self.emit(SIGNAL("void started()"))
         while self.retCode == None :
             try:
@@ -178,7 +164,7 @@ class SCJProgress(QHBoxLayout):
         self.createDir = createDir
         self.process = SCJ(self.filename, self.format, createDir)
         self.output = QString(self.process.output)
-        self.command = QString(self.process.command)
+        self.command = QStringList(self.process.command)
         self.log = QStringList()
 
         self.label = QLabel(self.output)
@@ -270,7 +256,7 @@ class SCJProgress(QHBoxLayout):
     def enable(self):
         self.process = SCJ(self.filename, self.format, self.createDir)
         self.output = QString(self.process.output)
-        self.command = QString(self.process.output)
+        self.command = QStringList(self.process.output)
         self.connect(self.process, SIGNAL('progress(int)'), self.bar.setValue)
         self.connect(self.process, SIGNAL('error(QString)'), self.addLog)
         self.connect(self.process, SIGNAL('finished()'), self.enable)
