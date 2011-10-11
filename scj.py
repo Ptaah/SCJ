@@ -131,9 +131,12 @@ class SCJ(QThread):
     def cancel(self):
         if self.process :
             try :
-                self.process.send_signal(signal.SIGCONT)
-                self.process.terminate()
-            except OSError :
+                try:
+                    self.process.terminate()
+                    self.process.wait()
+                except Exception as e:
+                    self.process.kill()
+            except OSError as e :
                 pass
         self.running = False
 
@@ -449,6 +452,14 @@ class QtSCJ(QDialog) :
     def startAll(self):
         for (key, job) in self.jobs.items():
             job.start()
+
+    def close(self):
+        print "We are stopping running jobs",
+        for (key, job) in self.jobs.items():
+            job.stop()
+            print ".",
+        print "Done"
+        super(QtSCJ, self).close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
