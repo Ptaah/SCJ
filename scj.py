@@ -70,6 +70,7 @@ class SCJ(QThread):
         if self.format != "mp3":
             self.command = [ u"/usr/bin/sox", u"-S", u"%s" % self.filename,
                              u"-t", u"%s" % self.format, u"%s" % self.output ]
+            self.pipecmd = None
         else:
             self.command = [ u"/usr/bin/sox", u"-S", u"%s" % self.filename,
                              u"-t", u"wav", u"-" ]
