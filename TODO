@@ -1,6 +1,5 @@
 * configure sox and ffmpeg path
 * autodetect sox and ffmpeg path/format
-* "remove all" button
 * checkbox for each progress to start/stop
 * autocheck progress when finished
 * interface translation

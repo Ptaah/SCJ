@@ -298,6 +298,7 @@ class QtSCJ(QDialog) :
         self.connect(self.convertDir,SIGNAL("clicked()"),self.getDir)
         self.connect(self.convertFile,SIGNAL("clicked()"),self.getFiles)
         self.connect(self.startallbtn,SIGNAL("clicked()"),self.startAll)
+        self.connect(self.delallbtn,SIGNAL("clicked()"),self.delAll)
         self.connect(self.output,SIGNAL("currentIndexChanged(const QString)"),
                      self.setMode)
 
@@ -352,10 +353,17 @@ class QtSCJ(QDialog) :
         self.horizontalLayout.addWidget(self.convertFile)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
+        # Layout for allButtons
+        self.allLayout = QHBoxLayout()
         # Add startAll bouton
         self.startallbtn = QPushButton(self)
-        self.verticalLayout.addWidget(self.startallbtn)
+        self.allLayout.addWidget(self.startallbtn)
         self.startallbtn.hide()
+        self.verticalLayout.addLayout(self.allLayout)
+        # Add delAll bouton
+        self.delallbtn = QPushButton(self)
+        self.allLayout.addWidget(self.delallbtn)
+        self.delallbtn.hide()
         # Mode avec scroll
         self.frame = QFrame()
         self.frame.setMinimumSize(520,250)
@@ -385,6 +393,8 @@ class QtSCJ(QDialog) :
         self.fermer.setText(u"Fermer")
         self.startallbtn.setToolTip(u"Démarrer toutes les tâches")
         self.startallbtn.setText(u"Tout démarrer")
+        self.delallbtn.setToolTip(u"Supprimmer toutes les tâches")
+        self.delallbtn.setText(u"Tout supprimer")
         self.convertDir.setToolTip(u"Convertir un répertoire")
         self.convertDir.setText(u"Répertoire")
         self.convertFile.setToolTip(u"Convertir un fichier")
@@ -442,10 +452,12 @@ class QtSCJ(QDialog) :
     def addStartAll(self):
         if (len(self.jobs) > 0 ):
             self.startallbtn.setVisible(True)
+            self.delallbtn.setVisible(True)
             self.scroll.setVisible(True)
             self.setFixedSize(600, 480)
         else:
             self.startallbtn.setVisible(False)
+            self.delallbtn.setVisible(False)
             self.scroll.setVisible(False)
             self.setFixedSize(600, 260)
         self.updateGeometry()
@@ -453,6 +465,10 @@ class QtSCJ(QDialog) :
     def startAll(self):
         for (key, job) in self.jobs.items():
             job.start()
+
+    def delAll(self):
+        for (key, job) in self.jobs.items():
+            self.delFile(key)
 
     def close(self):
         print "We are stopping running jobs",
