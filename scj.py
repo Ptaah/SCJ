@@ -468,6 +468,7 @@ class QtSCJ(QDialog) :
 
     def delAll(self):
         for (key, job) in self.jobs.items():
+            job.stop()
             self.delFile(key)
 
     def close(self):
