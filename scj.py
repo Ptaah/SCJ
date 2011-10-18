@@ -37,6 +37,15 @@ import subprocess
 import signal
 import re
 
+# Mutagen : manage tags on audio files
+try:
+    import mutagen
+    from mutagen.easyid3 import EasyID3
+except ImportError:
+    mp3tags = False
+    print >>sys.stderr, u"Warning Tags on MP3 files will not be available"
+else:
+    mp3tags = True
 
 
 def Process( command, output = subprocess.PIPE, outputerr = subprocess.PIPE,
@@ -146,6 +155,7 @@ class SCJ(QThread):
             self.emit(SIGNAL("error(QString)"), u"Code de retour sox : %d\n%s" %
                              (self.retCode, self.log))
         else:
+            if mp3tags : self.set_tags()
             self.setProgress(100)
         self.emit(SIGNAL("finished()"))
 
@@ -159,6 +169,23 @@ class SCJ(QThread):
             self.setProgress(float(val[:-1]))
         else :
             self.log.append(line)
+
+    def set_tags(self):
+        """
+        Update audio file metadata (Id3 tags...)
+        """
+        if self.format != "mp3":
+            return
+        tags =  mutagen.File(u"%s" % self.filename, easy = True)
+        audio = EasyID3(u"%s" % self.output)
+        for key in tags.keys():
+            # Ugly hack to have the year in the mp3 metadata
+            if key == "year":
+                audio["date"] = tags[key]
+            else:
+                if key in audio.valid_keys :
+                    audio[key] = tags[key]
+        audio.save()
 
 class SCJProgress(QHBoxLayout):
     def __init__(self, parent=None, file=None, format=None, createDir=False ):
