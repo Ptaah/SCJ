@@ -6,6 +6,8 @@ REQUIREMENTS
 ============
 SCJ is based on python and PyQt4.
 SCJ needs sox and ffmpeg to provide the convertion facility.
+If you want to convert to MP3 and keep metadata information, SCJ needs the 
+mutagen python library.
 
 INSTALL PROCESS
 ===============
