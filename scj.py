@@ -463,9 +463,10 @@ class QtSCJ(QDialog) :
 					            directory = QDir.homePath(),
 		                        options = QFileDialog.ShowDirsOnly |
                                 QFileDialog.DontResolveSymlinks)
-        directory = QDir(self.dir, self.filter)
-        for file in directory.entryInfoList():
-            self.addFile(file, createDir=True)
+        if self.dir :
+            directory = QDir(self.dir, self.filter)
+            for file in directory.entryInfoList():
+                self.addFile(file, createDir=True)
 
     def getFiles(self):
         files = QFileDialog.getOpenFileNames(
