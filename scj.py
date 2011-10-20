@@ -11,6 +11,9 @@ from PyQt4.QtCore import QStringList
 from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QThread
 from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import QTranslator
+from PyQt4.QtCore import QLocale
+from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QApplication
@@ -101,7 +104,7 @@ class SCJ(QThread):
         if not directory.exists() :
             if not directory.mkpath(path) :
                 self.emit(SIGNAL("error(QString)"),
-                          QString(u"Cannot create %s" % path))
+                          QString(self.trUtf8("Cannot create %s" % path)))
         SCJ.lock.unlock()
 
     def run(self):
@@ -152,8 +155,8 @@ class SCJ(QThread):
 
     def end(self):
         if self.retCode != 0 :
-            self.emit(SIGNAL("error(QString)"), u"Code de retour sox : %d\n%s" %
-                             (self.retCode, self.log))
+            self.emit(SIGNAL("error(QString)"), self.trUtf8("Code de retour sox : %d\n%s" %
+                             (self.retCode, self.log)))
         else:
             if mp3tags : self.set_tags()
             self.setProgress(100)
@@ -199,9 +202,9 @@ class SCJProgress(QHBoxLayout):
         self.log = QStringList()
 
         self.label = QLabel(self.output)
-        self.label.setToolTip(u"Destination: %s" % self.output)
+        self.label.setToolTip(self.trUtf8("Destination: %s" % self.output))
         self.bar = QProgressBar(parent)
-        self.bar.setToolTip(u"Source: %s" % self.filename)
+        self.bar.setToolTip(self.trUtf8("Source: %s" % self.filename))
         self.bar.setValue(0)
         self.startbtn = QPushButton(parent) 
         self.stopbtn = QPushButton(parent)
@@ -236,13 +239,13 @@ class SCJProgress(QHBoxLayout):
 
     def retranslateUi(self):
         self.startbtn.setIcon(QIcon(u"images/play.png"))
-        self.startbtn.setToolTip(u"Démarrer")
+        self.startbtn.setToolTip(self.trUtf8("Demarrer"))
         self.stopbtn.setIcon(QIcon(u"images/stop.png"))
-        self.stopbtn.setToolTip(u"Stopper")
+        self.stopbtn.setToolTip(self.trUtf8("Stopper"))
         self.cancelbtn.setIcon(QIcon(u"images/remove.png"))
-        self.cancelbtn.setToolTip(u"Annuler")
+        self.cancelbtn.setToolTip(self.trUtf8("Annuler"))
         self.logbtn.setIcon(QIcon(u"images/log.png"))
-        self.logbtn.setToolTip(u"Voir les détails")
+        self.logbtn.setToolTip(self.trUtf8("Voir les details"))
 
     def start(self):
         self.log.clear()
@@ -329,9 +332,6 @@ class QtSCJ(QDialog) :
         self.connect(self.output,SIGNAL("currentIndexChanged(const QString)"),
                      self.setMode)
 
-    def addText(self, text):
-        self.infoText.append(QString(text))
-
     def setMode(self, mode):
         self.mode = mode
         self.writeSettings()
@@ -350,10 +350,18 @@ class QtSCJ(QDialog) :
         #self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.verticalLayout = QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.infoText = QTextEdit(self)
+        #self.infoText = QTextEdit(self)
+        self.infoText = QLabel(self)
+        palette = QPalette()
+        brush = QBrush(QColor(245, 245, 245))
+        brush.setStyle(Qt.SolidPattern)
+        palette.setBrush(QPalette.Normal, QPalette.Background, brush)
+        self.infoText.setPalette(palette)
+        self.infoText.setAutoFillBackground(True)
         self.infoText.setFixedHeight(200)
         self.infoText.setObjectName("infoText")
-        self.infoText.setReadOnly(True)
+        #self.infoText.setReadOnly(True)
+        self.infoText.setWordWrap(True)
         self.verticalLayout.addWidget(self.infoText)
         # Manage Actions buttons
         self.horizontalLayout = QHBoxLayout()
@@ -362,7 +370,7 @@ class QtSCJ(QDialog) :
                                  QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         ## Format de sortie
-        self.outlabel = QLabel(u"Choix du format de destination")
+        self.outlabel = QLabel(self.trUtf8("Choix du format de destination"))
         self.horizontalLayout.addWidget(self.outlabel)
         self.output = QComboBox()
         self.output.addItems(self.modes)
@@ -415,28 +423,35 @@ class QtSCJ(QDialog) :
 
     def retranslateUi(self):
         self.setWindowTitle(u"SCJ")
-        self.infoText.setToolTip(u"Messages")
-        self.fermer.setToolTip(u"Fermer la fenêtre")
-        self.fermer.setText(u"Fermer")
-        self.startallbtn.setToolTip(u"Démarrer toutes les tâches")
-        self.startallbtn.setText(u"Tout démarrer")
-        self.delallbtn.setToolTip(u"Supprimmer toutes les tâches")
-        self.delallbtn.setText(u"Tout supprimer")
-        self.convertDir.setToolTip(u"Convertir un répertoire")
-        self.convertDir.setText(u"Répertoire")
-        self.convertFile.setToolTip(u"Convertir un fichier")
-        self.convertFile.setText(u"Fichier(s)")
-        self.addText(
-                u"<h1>BIENVENUE SUR SCJ</h1>\
-                \nSCJ permet de convertir un ou plusieurs fichiers son vers\
-                \ndifférents formats.<br/>\
-                \nIl gère également les répertoires en convertissant\
-                \nl'ensemble des fichiers sons présents vers le format voulu.\
-                \n<ul><li>Choisissez le format de destination</li>\
-                \n<li>Cliquez sur Fichier(s) ou Répertoire en fonction de ve que\
-                \nvous voulez convertir.</li>\
-                \n<li><b>Démarrez la conversion !</b></li></ul>"
-                )
+        self.infoText.setToolTip(self.trUtf8("Messages"))
+        self.fermer.setToolTip(self.trUtf8("Fermer la fenetre"))
+        self.fermer.setText(self.trUtf8("Fermer"))
+        self.startallbtn.setToolTip(self.trUtf8("Demarrer toutes les taches"))
+        self.startallbtn.setText(self.trUtf8("Tout demarrer"))
+        self.delallbtn.setToolTip(self.trUtf8("Supprimmer toutes les taches"))
+        self.delallbtn.setText(self.trUtf8("Tout supprimer"))
+        self.convertDir.setToolTip(self.trUtf8("Convertir un repertoire"))
+        self.convertDir.setText(self.trUtf8("Repertoire"))
+        self.convertFile.setToolTip(self.trUtf8("Convertir un fichier"))
+        self.convertFile.setText(self.trUtf8("Fichier(s)"))
+        self.infoText.setText(u"<h1>%s</h1>\
+                                \n%s<br/>\
+                                \n%s\
+                                \n<ul><li>%s</li>\
+                                \n    <li>%s</li>\
+                                \n    <li><b>%s</b></li>\
+                                \n</ul>" %
+                (self.trUtf8("BIENVENUE SUR SCJ"),
+                 self.trUtf8("SCJ permet de convertir un ou plusieurs fichiers"+
+                              " son vers differents formats."),
+                 self.trUtf8("Il gere egalement les repertoires en convertissant"+
+                              " l'ensemble des fichiers sons presents vers le"+
+                              " format voulu."),
+                 self.trUtf8("Choisissez le format de destination"),
+                 self.trUtf8("Cliquez sur Fichier(s) ou Repertoire en fonction"+
+                             " de ve que vous voulez convertir."),
+                 self.trUtf8("Demarrez la conversion !")
+                ))
 
     def addFile(self, file, createDir=False):
         file.makeAbsolute()
@@ -459,7 +474,7 @@ class QtSCJ(QDialog) :
     def getDir(self):
         self.dir = QFileDialog.getExistingDirectory(
                                 parent = self,
-                                caption = u"Choix du répertoire",
+                                caption = self.trUtf8("Choix du repertoire"),
 					            directory = QDir.homePath(),
 		                        options = QFileDialog.ShowDirsOnly |
                                 QFileDialog.DontResolveSymlinks)
@@ -471,9 +486,10 @@ class QtSCJ(QDialog) :
     def getFiles(self):
         files = QFileDialog.getOpenFileNames(
                                 parent = self,
-                                caption = u"Choix des fichiers",
+                                caption = self.trUtf8("Choix des fichiers"),
                                 directory = QDir.homePath(),
-                                filter = "Sons (%s)" % self.filter) 
+                                filter = u"%s (%s)" % (self.trUtf8("Sons"),
+                                                       self.filter))
         for file in files:
             self.addFile(QFileInfo(file), createDir=False)
 
@@ -500,15 +516,23 @@ class QtSCJ(QDialog) :
             self.delFile(key)
 
     def close(self):
-        print "We are stopping running jobs",
+        print u"%s" % self.trUtf8("We are stopping running jobs"),
         for (key, job) in self.jobs.items():
             job.stop()
             print ".",
-        print "Done"
+        print u"%s" % self.trUtf8("Done")
         super(QtSCJ, self).close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    # Init the translation mecanism
+    lang = str(QLocale.system().name())
+    print u"Language: %s" % lang
+    translator = QTranslator()
+    translator.load(u"locale/scj_%s.qm" % lang)
+    app.installTranslator(translator)
+
     #app.setStyle(QStyleFactory.create(EkdConfig.get("general", "qtstyle")))
     main = QtSCJ()
     main.show()

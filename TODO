@@ -2,6 +2,5 @@
 * autodetect sox and ffmpeg path/format
 * checkbox for each progress to start/stop
 * autocheck progress when finished
-* interface translation
 * configure the max concurent process
 * support distant action ?
